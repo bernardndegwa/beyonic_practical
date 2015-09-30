@@ -15,30 +15,46 @@ class HomePageTest(TestCase):
     def test_home_page_returns_correct_html(self):
         request = HttpRequest()  
         response = home_page(request)  
-        self.assertEqual(response.content.decode(), expected_html)
-        #self.assertTrue(response.content.startswith(b'<html>'))  
-        #self.assertIn(b'<title>Sign Up Form</title>', response.content)  
-        #self.assertTrue(response.content.strip().endswith(b'</html>')) 
+    def test_home_page_only_saves_items_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+        self.assertEqual(PhoneEmail.objects.count(), 0) 
 
-
+    
 class PhoneEmailModelTest(TestCase):
 
 
     def test_saving_and_retrieving_items(self):
-        first_item =PhoneEmail()
-        first_item.text = 'The first phoneemail is'
-        first_item.save()
+        third_item =PhoneEmail()
+        third_item.text = 'The third phoneemail'
+        third_item.save()
 
         second_item = PhoneEmail()
-        second_item.text = 'The second phoneemail is'
+        second_item.text = 'The second phoneemail'
         second_item.save()
 
         saved_items = PhoneEmail.objects.all()
         self.assertEqual(saved_items.count(), 2)
 
-        first_saved_item = saved_items[0]
+        third_saved_item = saved_items[0]
         second_saved_item = saved_items[1]
-        self.assertEqual(first_saved_item.text, 'The first phone email')
-        self.assertEqual(second_saved_item.text, 'The second phoneemail is')
+        self.assertEqual(third_saved_item.text, 'The third phoneemail')
+        self.assertEqual(second_saved_item.text, 'The second phoneemail')
 
+    def test_home_page_can_save_a_POST_request(self):
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['phoneemail_text'] = '1234567howdy@gmail.com'
 
+        response = home_page(request)
+
+        self.assertEqual(PhoneEmail.objects.count(), 1)  
+        new_item = PhoneEmail.objects.first()  
+        self.assertEqual(new_item.text, '1234567howdy@gmail.com')  
+
+        #self.assertIn('1234567howdy@gmail.com', response.content.decode())
+        expected_html = render_to_string(
+            'home.html',
+            {'new_item_text':  '1234567howdy@gmail.com'}
+        )
+        self.assertEqual(response.content.decode(), expected_html)

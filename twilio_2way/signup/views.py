@@ -1,8 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
+from signup.models import PhoneEmail
 
 def home_page(request):
     if request.method == 'POST':
-        return HttpResponse(request.POST['item_text'])
-    return render(request, 'home.html')
+        PhoneEmail.objects.create(text=request.POST['phoneemail_text'])
+        return redirect('/')
+        
+    phoneemails = PhoneEmail.objects.all()
+    return render(request, 'home.html', {'phoneemails': phoneemails})

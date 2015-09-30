@@ -10,7 +10,9 @@
         {% csrf_token %}
         </form>
         <table id="id_email_phone_number_table">
-        <tr><td>{{ new_item_text }}</td></tr>
+        {% for item in phoneemails %}
+            <tr><td>1: {{ item.text }}</td></tr>
+        {% endfor %} 
     </table>
     </body>
 </html>
